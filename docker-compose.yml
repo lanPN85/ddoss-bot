@@ -1,0 +1,18 @@
+version: "3.5"
+
+services:
+  bot:
+    image: ddoss-bot:latest
+    env_file:
+      - .env
+    build:
+      context: .
+      network: host
+    network_mode: host
+    command:
+      - watchfiles
+      - "python bot.py"
+      - src/
+      - bot.py
+    volumes:
+      - .:/app

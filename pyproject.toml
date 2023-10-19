@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ddoss-bot"
+version = "0.1.0"
+description = "Telegram bot for DDoSS"
+authors = ["lanpn <phan.ngoclan58@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+loguru = "^0.7.2"
+python-telegram-bot = "^20.6"
+pydantic = "^2.4.2"
+injectable = "^3.4.7"
+pydantic-settings = "^2.0.3"
+caribou = "^0.3.0"
+watchfiles = "^0.21.0"
+strenum = "^0.4.15"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.6.0"
+black = "^23.9.1"
+pylint = "^3.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

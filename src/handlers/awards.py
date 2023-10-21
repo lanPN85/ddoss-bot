@@ -90,8 +90,7 @@ class AwardCommandHandler(MessageHandler):
             await self.db_helper.insert_award(award)
 
         await update.message.reply_text(
-            f"Ghi nhận phiếu {'bé ngoan' if award.type_ == AwardType.UPVOTE else 'bé hư'} từ {award.from_user} đến {award.to_user}\n```\n{award.message}\n```",
-            parse_mode="Markdown",
+            f"Ghi nhận phiếu {'bé ngoan' if award.type_ == AwardType.UPVOTE else 'bé hư'} từ {award.from_user} đến {award.to_user}",
         )
 
         sticker_id = (
@@ -127,7 +126,7 @@ class AwardCommandHandler(MessageHandler):
         else:
             return CommandParseError.MISSING_VOTE_TYPE
 
-        mentions = update.message.parse_entities(types=[MessageEntity.TEXT_MENTION])
+        mentions = update.message.parse_entities(types=[MessageEntity.TEXT_MENTION, MessageEntity.MENTION])
 
         # Find to_user
         to_user: str | None = None
@@ -136,8 +135,9 @@ class AwardCommandHandler(MessageHandler):
 
         for entity, text in mentions.items():
             if entity.user is None:
-                continue
-            to_user = entity.user.name
+                to_user = str(text)
+            else:
+                to_user = entity.user.name
 
         if to_user is None:
             return CommandParseError.NO_TARGET

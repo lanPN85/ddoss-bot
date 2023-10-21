@@ -51,6 +51,7 @@ class AwardCommandHandler(MessageHandler):
 
     async def callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         award = self._parse_update(update)
+        logger.debug(str(award))
 
         if isinstance(award, CommandParseError):
             if award == CommandParseError.NO_TARGET:
@@ -97,7 +98,7 @@ class AwardCommandHandler(MessageHandler):
             return CommandParseError.INVALID
         if update.message.text is None:
             return CommandParseError.INVALID
-        if not update.message.text.startswith(self.UPVOTE_PREFIX) and not update.message.text.startswith(self.DOWNVOTE_PREFIX):
+        if (not update.message.text.startswith(self.UPVOTE_PREFIX)) and (not update.message.text.startswith(self.DOWNVOTE_PREFIX)):
             return CommandParseError.NO_INTENT
 
         # Get name of the source user

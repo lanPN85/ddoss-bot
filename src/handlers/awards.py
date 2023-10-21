@@ -127,7 +127,7 @@ class AwardCommandHandler(MessageHandler):
         else:
             return CommandParseError.MISSING_VOTE_TYPE
 
-        mentions = update.message.parse_entities(types=[MessageEntity.MENTION])
+        mentions = update.message.parse_entities(types=[MessageEntity.TEXT_MENTION])
 
         # Find to_user
         to_user: str | None = None

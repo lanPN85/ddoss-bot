@@ -14,6 +14,7 @@ class AwardCommandHandler(MessageHandler):
 
     UPVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADXWUzr797w2UVRRGCIQ9oCT0kXrbBAALZCQACO5tgVshOxj70tmM4MAQ"
     DOWNVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADS2Uzcdq_YGE4TRtTbhAktnHVGD0RAALrBwACRin5VHjhGcim1L5hMAQ"
+    COMMAND_PREFIX = "/give"
 
     @autowired
     def __init__(self, bot_name: str, award_limit: int | None, db_helper: Autowired(IDatabaseHelper)):
@@ -60,6 +61,8 @@ class AwardCommandHandler(MessageHandler):
             return None
         if update.message.text is None:
             return None
+        if not update.message.text.startswith(self.COMMAND_PREFIX):
+            return None
 
         # Get name of the source user
         from_user = update.message.from_user.name
@@ -67,15 +70,14 @@ class AwardCommandHandler(MessageHandler):
 
         # Get award type
         award_type = None
-        if "/aw +1 " in update.message.text:
+        if update.message.text.startswith(f"{self.COMMAND_PREFIX} +1"):
             award_type = AwardType.UPVOTE
-        elif "/aw -1 " in update.message.text:
+        elif update.message.text.startswith(f"{self.COMMAND_PREFIX} -1"):
             award_type = AwardType.DOWNVOTE
         else:
             return None
 
         mentions = update.message.parse_entities(types=[MessageEntity.MENTION])
-        logger.debug(str(mentions))
 
         # Find to_user
         to_user: str | None = None
@@ -93,9 +95,9 @@ class AwardCommandHandler(MessageHandler):
 
         # Find the award message
         message = ""
-        command_offset = update.message.text.find("/aw")
+        command_offset = update.message.text.find(self.COMMAND_PREFIX)
         if command_offset != -1:
-            message = update.message.text[command_offset + 4 :]
+            message = update.message.text[command_offset + len(self.COMMAND_PREFIX) + 1:]
 
         return Award(
             chat_name=chat_name,

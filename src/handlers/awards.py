@@ -13,9 +13,7 @@ from src.model import Award, AwardType
 class CommandParseError(StrEnum):
     INVALID = "invalid"
     NO_INTENT = "no_intent"
-    MISSING_VOTE_TYPE = "missing_vote_type"
     NO_TARGET = "no_target"
-    HELP = "help"
 
 
 class AwardCommandHandler(MessageHandler):
@@ -27,7 +25,8 @@ class AwardCommandHandler(MessageHandler):
     DOWNVOTE_STICKER_ID = (
         "CAACAgUAAx0CfkbxYQADS2Uzcdq_YGE4TRtTbhAktnHVGD0RAALrBwACRin5VHjhGcim1L5hMAQ"
     )
-    COMMAND_PREFIX = "/give"
+    UPVOTE_PREFIX = "/up"
+    DOWNVOTE_PREFIX = "/down"
 
     @autowired
     def __init__(
@@ -43,30 +42,20 @@ class AwardCommandHandler(MessageHandler):
         self.write_lock = Lock()
 
     @property
-    def template_string(self) -> str:
-        return f"{self.COMMAND_PREFIX} +1/-1 <thông điệp + mention người nhận phiếu>"
+    def upvote_template_string(self) -> str:
+        return f"{self.UPVOTE_PREFIX} <thông điệp + mention người nhận phiếu>"
+
+    @property
+    def downvote_template_string(self) -> str:
+        return f"{self.DOWNVOTE_PREFIX} <thông điệp + mention người nhận phiếu>"
 
     async def callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         award = self._parse_update(update)
 
         if isinstance(award, CommandParseError):
-            if award == CommandParseError.MISSING_VOTE_TYPE:
-                await update.message.reply_text(
-                    f"Sai cú pháp 🤮🤮\n```\n{self.template_string}\n```",
-                    parse_mode="Markdown",
-                )
             if award == CommandParseError.NO_TARGET:
                 await update.message.reply_text(
                     "Mention người được nhận đi bác. Không thì tặng phiếu cho ai 🫣"
-                )
-            if award == CommandParseError.HELP:
-                await update.message.reply_text(
-                    "Tặng phiếu bé ngoan/bé hư cho người khác bằng cách nhắn tin với cú pháp\n"
-                    f"```\n{self.template_string}\n```\n"
-                    "+1 ứng với phiếu bé ngoan. -1 ứng với phiếu bé hư\n"
-                    f"VD: `{self.COMMAND_PREFIX} +1 Cảm ơn @user đã hỗ trợ trong công việc`\n"
-                    f"Mỗi người được phép tặng tối đa {self.award_limit or 'vô hạn'} phiếu mỗi ngày",
-                    parse_mode="Markdown",
                 )
 
             return
@@ -108,10 +97,8 @@ class AwardCommandHandler(MessageHandler):
             return CommandParseError.INVALID
         if update.message.text is None:
             return CommandParseError.INVALID
-        if not update.message.text.startswith(self.COMMAND_PREFIX):
+        if not update.message.text.startswith(self.UPVOTE_PREFIX) and not update.message.text.startswith(self.DOWNVOTE_PREFIX):
             return CommandParseError.NO_INTENT
-        if update.message.text.strip() == f"{self.COMMAND_PREFIX} help":
-            return CommandParseError.HELP
 
         # Get name of the source user
         from_user = update.message.from_user.name
@@ -119,12 +106,13 @@ class AwardCommandHandler(MessageHandler):
 
         # Get award type
         award_type = None
-        if update.message.text.startswith(f"{self.COMMAND_PREFIX} +1"):
+        prefix = ""
+        if update.message.text.startswith(f"{self.UPVOTE_PREFIX}"):
             award_type = AwardType.UPVOTE
-        elif update.message.text.startswith(f"{self.COMMAND_PREFIX} -1"):
+            prefix = self.UPVOTE_PREFIX
+        elif update.message.text.startswith(f"{self.DOWNVOTE_PREFIX}"):
             award_type = AwardType.DOWNVOTE
-        else:
-            return CommandParseError.MISSING_VOTE_TYPE
+            prefix = self.DOWNVOTE_PREFIX
 
         mentions = update.message.parse_entities(types=[MessageEntity.TEXT_MENTION, MessageEntity.MENTION])
 
@@ -144,10 +132,10 @@ class AwardCommandHandler(MessageHandler):
 
         # Find the award message
         message = ""
-        command_offset = update.message.text.find(self.COMMAND_PREFIX)
+        command_offset = update.message.text.find(prefix)
         if command_offset != -1:
             message = update.message.text[
-                command_offset + len(self.COMMAND_PREFIX) + 1 :
+                command_offset + len(prefix) + 1 :
             ]
 
         return Award(

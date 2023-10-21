@@ -12,7 +12,7 @@ from src.model import Award, AwardType
 class AwardCommandHandler(MessageHandler):
     """Responds to award command"""
 
-    UPVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADQWUzcPX6ZpOGSfRZ6aTPTvPKkqWbAAJMCQAC_GdgVmWYfNgQsYbJMAQ"
+    UPVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADXWUzr797w2UVRRGCIQ9oCT0kXrbBAALZCQACO5tgVshOxj70tmM4MAQ"
     DOWNVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADS2Uzcdq_YGE4TRtTbhAktnHVGD0RAALrBwACRin5VHjhGcim1L5hMAQ"
 
     @autowired
@@ -44,7 +44,7 @@ class AwardCommandHandler(MessageHandler):
         sticker_id = self.UPVOTE_STICKER_ID if award.type_ == AwardType.UPVOTE else self.DOWNVOTE_STICKER_ID
 
         await update.message.reply_sticker(
-            sticker=sticker_id
+            sticker=sticker_id,
         )
 
     def _parse_update(self, update: Update) -> Award | None:

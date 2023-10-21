@@ -1,9 +1,7 @@
 import logging
-import asyncio
 
 from injectable import load_injection_container, autowired, Autowired
 from loguru import logger
-from telegram import Update
 from telegram.constants import UpdateType
 from telegram.ext import Application, BaseHandler
 
@@ -20,7 +18,6 @@ def main(application: Autowired(Application), handlers: Autowired(list[BaseHandl
         allowed_updates=[
             UpdateType.CHANNEL_POST,
             UpdateType.MESSAGE,
-            UpdateType.CHANNEL_POST,
         ]
     )
 

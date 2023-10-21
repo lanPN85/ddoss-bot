@@ -15,7 +15,7 @@ def main(application: Autowired(Application), handlers: Autowired(list[BaseHandl
 
     application.add_handlers(handlers)
 
-    logger.info("Running bot...") 
+    logger.info("Running bot...")
     application.run_polling(
         allowed_updates=[
             UpdateType.CHANNEL_POST,

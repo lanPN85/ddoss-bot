@@ -4,6 +4,8 @@ from injectable import injectable
 
 @injectable(singleton=True)
 class Settings(BaseSettings):
+    bot_canon_name: str = "@tcv_ddoss_bot"
+    
     telegram_token: str
 
     postgres_user: str = ""

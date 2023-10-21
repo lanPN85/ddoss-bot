@@ -25,7 +25,6 @@ class MessageCounterHandler(MessageHandler):
     async def callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         async with self.lock:
             post = update.message
-            logger.debug(str(update.to_json()))
 
             if post is None:
                 return
@@ -48,6 +47,5 @@ class MessageCounterHandler(MessageHandler):
                 topic_name=topic_name or "",
                 type_=message_type,
             )
-            logger.debug(str(key))
 
             await self.db_helper.increment_message_count(key)

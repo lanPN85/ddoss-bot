@@ -24,4 +24,6 @@ def db_factory(settings: Autowired(Settings)) -> IDatabaseHelper:
 @injectable_factory(AwardCommandHandler, singleton=True)
 @autowired
 def award_handler_factory(settings: Autowired(Settings)) -> AwardCommandHandler:
-    return AwardCommandHandler(settings.bot_canon_name)
+    return AwardCommandHandler(
+        settings.bot_canon_name, award_limit=settings.daily_award_limit
+    )

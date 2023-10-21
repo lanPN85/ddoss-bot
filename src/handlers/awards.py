@@ -16,28 +16,36 @@ class AwardCommandHandler(MessageHandler):
     DOWNVOTE_STICKER_ID = "CAACAgUAAx0CfkbxYQADS2Uzcdq_YGE4TRtTbhAktnHVGD0RAALrBwACRin5VHjhGcim1L5hMAQ"
 
     @autowired
-    def __init__(self, bot_name: str, db_helper: Autowired(IDatabaseHelper)):
+    def __init__(self, bot_name: str, award_limit: int | None, db_helper: Autowired(IDatabaseHelper)):
         super().__init__(filters=filters.ALL, callback=self.callback)
         self.bot_name = bot_name
+        self.award_limit = award_limit
         self.db_helper: IDatabaseHelper = db_helper
+        self.write_lock = Lock()
 
     async def callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        logger.debug(update.to_json())
         award = self._parse_update(update)
 
         if award is None:
             return
-
-        logger.debug(str(award))
 
         if award.to_user == award.from_user:
             await update.message.reply_text("Tự cho mình phiếu bé ngoan?? Cút.")
             return
 
         # TODO write to db
+        async with self.write_lock:
+            if self.award_limit is not None:
+                current_award_count = await self.db_helper.count_user_awards_today(award.from_user)
+
+                if current_award_count >= self.award_limit:
+                    await update.message.reply_text(f"Một ngày chỉ được cho {self.award_limit} phiếu thôi. Okay?")
+                    return
+
+            await self.db_helper.insert_award(award)
 
         await update.message.reply_text(
-            f"Ghi nhận phiếu {'bé ngoan' if award.type_ == AwardType.UPVOTE else 'bé hư'} từ {award.from_user} đến {award.to_user}\n```{award.message}```",
+            f"Ghi nhận phiếu {'bé ngoan' if award.type_ == AwardType.UPVOTE else 'bé hư'} từ {award.from_user} đến {award.to_user}\n```\n{award.message}\n```",
             parse_mode="Markdown",
         )
 

@@ -1,8 +1,9 @@
 from .base import IDatabaseHelper
-from src.model import MessageKey, MessageType
+from src.model import Award, MessageKey
 import asyncpg
 from asyncpg.pool import Pool
 from asyncio import Lock
+from datetime import date
 
 
 class PostgresDatabaseHelper(IDatabaseHelper):
@@ -37,3 +38,36 @@ class PostgresDatabaseHelper(IDatabaseHelper):
                 key.topic_name,
                 key.type_,
             )
+
+    async def insert_award(self, award: Award) -> int:
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO awards(from_user, to_user, type_, chat_name, message, awarded_at)
+                VALUES($1, $2, $3, $4, $5, $6)
+                """,
+                award.from_user,
+                award.to_user,
+                award.type_,
+                award.chat_name,
+                award.message,
+                award.awarded_at,
+            )
+
+    async def count_user_awards_today(self, user_name: str) -> int:
+        today = date.today()
+        pool = await self._get_pool()
+
+        async with pool.acquire() as conn:
+            result = await conn.fetchval(
+                """
+                SELECT COUNT(id)
+                FROM awards
+                WHERE from_user = $1
+                    AND DATE(awarded_at) = $2
+                """,
+                user_name,
+                today,
+            )
+            return result

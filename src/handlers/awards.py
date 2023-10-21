@@ -75,7 +75,6 @@ class AwardCommandHandler(MessageHandler):
             await update.message.reply_text("Tự cho mình phiếu bé ngoan?? Cút.")
             return
 
-        # TODO write to db
         async with self.write_lock:
             if self.award_limit is not None:
                 current_award_count = await self.db_helper.count_user_awards_today(
@@ -133,7 +132,6 @@ class AwardCommandHandler(MessageHandler):
         # Find to_user
         to_user: str | None = None
 
-        # TODO remove this
         # to_user = "lanpn"
 
         for entity, text in mentions.items():

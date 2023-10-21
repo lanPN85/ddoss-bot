@@ -12,7 +12,7 @@ class MessageType(StrEnum):
 @dataclass
 class MessageKey:
     date: date
-    chat_id: int
-    user_id: int
     type_: MessageType
-    topic_name: str | None = None
+    user_name: str
+    chat_name: str
+    topic_name: str

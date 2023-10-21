@@ -16,3 +16,16 @@ services:
       - bot.py
     volumes:
       - .:/app
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: "localhost"
+      POSTGRES_PORT: "5555"
+  db:
+    image: "postgres:15-bullseye"
+    ports:
+      - 5555:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    env_file:
+      - .env

@@ -16,6 +16,9 @@ pydantic-settings = "^2.0.3"
 caribou = "^0.3.0"
 watchfiles = "^0.21.0"
 strenum = "^0.4.15"
+yoyo-migrations = "^8.2.0"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.28.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -9,3 +9,6 @@ logs:
 
 dev: build stop && logs
     docker-compose up -d
+
+migrate:
+    yoyo apply -p

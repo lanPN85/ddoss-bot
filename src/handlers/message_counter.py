@@ -48,4 +48,5 @@ class MessageCounterHandler(MessageHandler):
                 type_=message_type,
             )
 
+            logger.info(f"Incrementing message count for {key}")
             await self.db_helper.increment_message_count(key)

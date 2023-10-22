@@ -11,7 +11,9 @@ def main(application: Autowired(Application), handlers: Autowired(list[BaseHandl
     application: Application = application
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    application.add_handlers(handlers)
+    for i, handler in enumerate(handlers):
+        logger.info(f"Adding handler {handler.__class__.__name__}")
+        application.add_handler(handler, group=i + 1)
 
     logger.info("Running bot...")
     application.run_polling(

@@ -25,7 +25,6 @@ class MessageCounterHandler(MessageHandler):
     async def callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         async with self.lock:
             post = update.message
-            logger.debug(str(post))
 
             if post is None:
                 return

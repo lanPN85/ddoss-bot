@@ -4,11 +4,16 @@ import asyncpg
 from asyncpg.pool import Pool
 from asyncio import Lock
 from datetime import date
+from injectable import injectable, Autowired, autowired
+
+from src.settings import PostgresSettings
 
 
+@injectable(singleton=True, primary=True)
 class PostgresDatabaseHelper(IDatabaseHelper):
-    def __init__(self, postgres_dsn: str) -> None:
-        self.postgres_dsn = postgres_dsn
+    @autowired
+    def __init__(self, settings: Autowired(PostgresSettings)) -> None:
+        self.postgres_dsn = settings.dsn()
         self.pool: Pool | None = None
         self.pool_lock = Lock()
 

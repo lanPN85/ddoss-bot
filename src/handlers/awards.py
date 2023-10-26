@@ -8,6 +8,7 @@ from strenum import StrEnum
 
 from src.db.base import IDatabaseHelper
 from src.model import Award, AwardType
+from src.settings import AwardHandlerSettings
 
 
 class CommandParseError(StrEnum):
@@ -16,6 +17,7 @@ class CommandParseError(StrEnum):
     NO_TARGET = "no_target"
 
 
+@injectable(singleton=True)
 class AwardCommandHandler(MessageHandler):
     """Responds to award command"""
 
@@ -31,13 +33,12 @@ class AwardCommandHandler(MessageHandler):
     @autowired
     def __init__(
         self,
-        bot_name: str,
-        award_limit: int | None,
+        settings: Autowired(AwardHandlerSettings),
         db_helper: Autowired(IDatabaseHelper),
     ):
         super().__init__(filters=filters.ALL, callback=self.callback)
-        self.bot_name = bot_name
-        self.award_limit = award_limit
+
+        self.award_limit: int | None = settings.daily_award_limit
         self.db_helper: IDatabaseHelper = db_helper
         self.write_lock = Lock()
 
@@ -98,7 +99,9 @@ class AwardCommandHandler(MessageHandler):
             return CommandParseError.INVALID
         if update.message.text is None:
             return CommandParseError.INVALID
-        if (not update.message.text.startswith(self.UPVOTE_PREFIX)) and (not update.message.text.startswith(self.DOWNVOTE_PREFIX)):
+        if (not update.message.text.startswith(self.UPVOTE_PREFIX)) and (
+            not update.message.text.startswith(self.DOWNVOTE_PREFIX)
+        ):
             return CommandParseError.NO_INTENT
 
         # Get name of the source user
@@ -115,7 +118,9 @@ class AwardCommandHandler(MessageHandler):
             award_type = AwardType.DOWNVOTE
             prefix = self.DOWNVOTE_PREFIX
 
-        mentions = update.message.parse_entities(types=[MessageEntity.TEXT_MENTION, MessageEntity.MENTION])
+        mentions = update.message.parse_entities(
+            types=[MessageEntity.TEXT_MENTION, MessageEntity.MENTION]
+        )
 
         # Find to_user
         to_user: str | None = None
@@ -135,9 +140,7 @@ class AwardCommandHandler(MessageHandler):
         message = ""
         command_offset = update.message.text.find(prefix)
         if command_offset != -1:
-            message = update.message.text[
-                command_offset + len(prefix) + 1 :
-            ]
+            message = update.message.text[command_offset + len(prefix) + 1 :]
 
         return Award(
             chat_name=chat_name,

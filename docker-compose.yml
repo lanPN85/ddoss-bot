@@ -21,6 +21,23 @@ services:
     environment:
       POSTGRES_HOST: "localhost"
       POSTGRES_PORT: "5555"
+  scheduler:
+    image: ddoss-bot:latest
+    env_file:
+      - .env
+    network_mode: host
+    command:
+      - watchfiles
+      - "python scheduler.py"
+      - src/
+      - scheduler.py
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: "localhost"
+      POSTGRES_PORT: "5555"
   db:
     image: "postgres:15-bullseye"
     ports:
